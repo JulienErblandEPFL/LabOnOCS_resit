@@ -1,0 +1,26 @@
+attacker@M3 ~/Documents/Project $ python main.py
+WARNING: No route found for IPv6 destination :: (no default route?)
+Traceback (most recent call last):
+  File "main.py", line 2, in <module>
+    from attacks.arp_spoof import start_arp_spoofing, restore_all_arp
+ImportError: No module named attacks.arp_spoof
+
+
+attacks  main.py  network_utils.py  network_utils.pyc  __pycache__
+
+./attacks:
+arp_spoof.py  dns_spoof.py  __pycache__
+
+./attacks/__pycache__:
+arp_spoof.cpython-35.pyc  dns_spoof.cpython-35.pyc  ssl_strip.cpython-35.pyc
+arp_spoof.cpython-39.pyc  dns_spoof.cpython-39.pyc
+
+./__pycache__:
+network_utils.cpython-35.pyc  packet_forwarder.cpython-35.pyc
+
+Traceback (most recent call last):
+  File "main.py", line 175, in <module>
+    main()
+  File "main.py", line 160, in main
+    choice = input("Select option [0-2]: ").strip()
+AttributeError: 'int' object has no attribute 'strip'
