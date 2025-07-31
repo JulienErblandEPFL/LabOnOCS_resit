@@ -16,7 +16,6 @@ def scan_network(ip_range, iface=None):
     for _, response in answered:
         ip = response.psrc  # Source IP from response
         mac = response.hwsrc  # Source MAC from response
-        #print("[+] Found: {} at {}".format(ip, mac))  # Display each found device
         hosts.append((ip, mac))  # Add to result list
 
     return hosts  # Return list of detected (IP, MAC)
