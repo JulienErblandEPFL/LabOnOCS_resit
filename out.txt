@@ -1,26 +1,201 @@
-attacker@M3 ~/Documents/Project $ python main.py
-WARNING: No route found for IPv6 destination :: (no default route?)
-Traceback (most recent call last):
-  File "main.py", line 2, in <module>
-    from attacks.arp_spoof import start_arp_spoofing, restore_all_arp
-ImportError: No module named attacks.arp_spoof
+1. Start ARP spoofing only
+2. Start ARP + DNS spoofing
+0. Exit
 
+Select option [0-2]: 1
 
-attacks  main.py  network_utils.py  network_utils.pyc  __pycache__
+Available network interfaces:
+  0. lo
+  1. enp0s3
+  2. docker0
+  3. enp0s8
+Enter your choice: 1
 
-./attacks:
-arp_spoof.py  dns_spoof.py  __pycache__
+[*] Scanning network on 192.168.56.0/24...
 
-./attacks/__pycache__:
-arp_spoof.cpython-35.pyc  dns_spoof.cpython-35.pyc  ssl_strip.cpython-35.pyc
-arp_spoof.cpython-39.pyc  dns_spoof.cpython-39.pyc
+Select the gateway (router):
+  0. 192.168.56.1 (0a:00:27:00:00:00)
+  1. 192.168.56.100 (08:00:27:01:2a:db)
+  2. 192.168.56.101 (08:00:27:b7:c4:af)
+  3. 192.168.56.102 (08:00:27:cc:08:6f)
+Gateway index: 3
 
-./__pycache__:
-network_utils.cpython-35.pyc  packet_forwarder.cpython-35.pyc
+Detected devices (excluding gateway):
+  0. 192.168.56.1 (0a:00:27:00:00:00)
+  1. 192.168.56.100 (08:00:27:01:2a:db)
+  2. 192.168.56.101 (08:00:27:b7:c4:af)
 
-Traceback (most recent call last):
-  File "main.py", line 175, in <module>
-    main()
-  File "main.py", line 160, in main
-    choice = input("Select option [0-2]: ").strip()
-AttributeError: 'int' object has no attribute 'strip'
+Select victim indexes (comma-separated) or 'a' for all:
+Your choice: 2
+
+[*] ARP spoof type:
+  1. Normal MITM (modify traffic)
+  2. Anonymous SMITM (sniff only)
+Your choice [1-2]: 1
+
+[*] ARP send interval:
+  1. Fast (1s)
+  2. Normal (2s)
+  3. Slow (10s)
+  4. Custom
+Your choice [1-4]: 2
+
+[*] Starting ARP spoofing on 1 victim(s)...
+[*] ARP spoofing started.
+
+[*] ARP-only mode. Press Ctrl+C to stop.
+    Mode: Normal MITM
+    Interval: 2s
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.101 > 192.168.56.102 echo-request 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / IP / ICMP 192.168.56.102 > 192.168.56.101 echo-reply 0 / Raw
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:d0:25:4b says 192.168.56.101
+[+] Sent ARP spoof to 192.168.56.101 and gateway
+^C
+[!] Interrupted by user; cleaning up...
+
+[*] Restoring network settings...
+[*] Cleaning up: restoring ARP tables...
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:cc:08:6f says 192.168.56.102
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+[*] Sniffed: Ether / ARP is at 08:00:27:b7:c4:af says 192.168.56.101
+

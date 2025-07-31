@@ -1,0 +1,10 @@
+2025-07-31 17:53:29,208 INFO: === DNS Spoofer Log Started ===
+2025-07-31 17:53:29,272 INFO: Started DNS spoofer on interface enp0s3, queue 1
+2025-07-31 17:53:56,751 INFO: IGNORED: 192.168.56.101 requested 102.56.168.192.in-addr.arpa
+2025-07-31 17:53:56,752 INFO: DROPPED ICMP port-unreachable to 192.168.56.101
+2025-07-31 17:53:58,763 INFO: IGNORED: 192.168.56.101 requested www.facebook.com
+2025-07-31 17:53:58,765 INFO: DROPPED ICMP port-unreachable to 192.168.56.101
+2025-07-31 17:54:00,769 INFO: IGNORED: 192.168.56.101 requested www.facebook.com
+2025-07-31 17:54:00,772 INFO: DROPPED ICMP port-unreachable to 192.168.56.101
+2025-07-31 17:54:06,619 INFO: SPOOFED: 192.168.56.101 requested www.google.com → redirected to 192.168.56.102
+2025-07-31 17:54:17,372 INFO: Stopped DNS spoofer, NFQUEUE unbound.
