@@ -1,5 +1,3 @@
-# dns_spoof.py
-
 import os
 import logging
 from netfilterqueue import NetfilterQueue
@@ -7,7 +5,7 @@ from scapy.all import IP, UDP, DNS, DNSQR, DNSRR, ICMP, send, conf
 
 def init_logging(log_dir="logs", log_file="dns_spoof.log"):
     """
-    Initialize file‐based logging for DNS spoof events.
+    Initialize file-based logging for DNS spoof events.
     """
     if not os.path.isdir(log_dir):
         os.makedirs(log_dir)

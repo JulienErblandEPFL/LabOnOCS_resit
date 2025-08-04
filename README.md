@@ -16,5 +16,5 @@ Install dependencies with: ```pip install -r requirements.txt ```
 2. Select the network interface and scan the network. 
 3. Choose one or multiple targets and gateway. 
 4. Start ARP spoofing or ARP + DNS spoofing. 
-5. Provide domains to spoof and the fake IPs. 
+5. Provide domains to spoof and the fake IPs if DNS enabled. 
 6. Press `Ctrl+C` to stop. ARP tables will be automatically restored.

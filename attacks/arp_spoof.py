@@ -46,7 +46,7 @@ def start_arp_spoofing(
     print("    Mode: {}".format(mode))
     print("    Interval: {}s".format(interval))
 
-    # -- enable forwarding and disable ICMP redirects and rp_filter --
+    # enable forwarding and disable ICMP redirects and rp_filter
     print("[*] Enabling IP forwarding and disabling ICMP redirects/rp_filter...")
     os.system("sysctl -w net.ipv4.ip_forward=1")
     os.system("sysctl -w net.ipv4.conf.all.rp_filter=0")
