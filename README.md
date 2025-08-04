@@ -1,59 +1,20 @@
-# MITM Attack Automation Toolkit – Group 29
+# MITM Attack Automation Toolkit – Group 29 
+This project was developed as part of the 2IC80 Lab on Offensive Computer Security. It implements a modular and scriptable tool for launching **ARP poisoning** and **DNS spoofing** attacks in a virtual network environment using Python and Scapy. > ⚠️ This tool is for educational and ethical hacking purposes only. --- 
+## 🧰 Features 
+- **ARP Spoofing**: Places the attacker in a man-in-the-middle (MITM) position between selected victims and the gateway. - Supports multiple targets. - Includes Normal MITM and Anonymous SMITM modes. - Customizable spoofing interval. - Automatic ARP table restoration on exit. 
+- **DNS Spoofing**: Intercepts DNS queries and responds with forged answers based on a user-defined domain-to-IP mapping. - No need to win race conditions thanks to MITM position. - Built with NetfilterQueue for real-time packet manipulation. - Includes live logging and clean teardown logic. --- 
+## ⚙️ Requirements 
+- Python 3.6+ 
+- Linux system with root privileges 
+- The following Python dependencies: 
+- `scapy==2.2.0` 
+- `netfilterqueue` 
+Install dependencies with: ```bash pip install -r requirements.txt ``` --- 
 
-This project is part of the 2IC80 Lab on Offensive Computer Security. It provides a modular tool that allows a user to perform ARP spoofing, DNS spoofing, and (partial) SSL stripping attacks in a virtual environment using Scapy.
-
-> This tool is for educational and ethical hacking purposes only.
-
----
-
-## Features
-
-- **ARP Spoofing**: Intercepts traffic between a victim and a gateway.
-- **DNS Spoofing** (optional): Redirects DNS queries to attacker-controlled IPs.
-- **SSL Stripping** (prototype): Intercepts HTTP traffic and rewrites content to prevent HTTPS upgrades.
-
----
-
-## Requirements
-
-- Python 3.6+
-- Linux OS with root privileges
-- **Dependencies**:
-  - `scapy==2.2.0`
-
-## System Configuration
-
-Before running the tool, you must configure your system for packet forwarding and proper network behavior. These settings are required for ARP spoofing, DNS spoofing, and SSL stripping to work correctly.
-
----
-
-### Enable IP Forwarding
-
-IP forwarding allows your machine to forward packets between interfaces, which is essential for any man-in-the-middle (MITM) attack.
-
-#### Temporary (until reboot):
-    ```bash
-    echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-
-### Permanent Activation of IP Forwarding
-
-To ensure IP forwarding remains enabled after a reboot, you must modify the system configuration:
-
-1. Open the system configuration file:
-   ```bash
-   sudo nano /etc/sysctl.conf
-
-2. Find the following line and uncomment it, or add it manually:
-    ```bash
-    net.ipv4.ip_forward=1
-
-3. Save and exit
-
-### Disable ICMP "Port Unreachable" Messages (Optional)
-
-By default, your system may respond with ICMP "port unreachable" messages when it receives traffic on closed ports, which could interfere with packet interception during spoofing attacks.
-
-To temporarily disable these responses, run:
-
-    ```bash
-    sudo iptables -I OUTPUT -p icmp --icmp-type port-unreachable -j DROP
+## 🚀 How to Use 
+1. Run `main.py` as root: ```bash sudo python3 main.py ``` 
+2. Select the network interface and scan the network. 
+3. Choose one or multiple targets and gateway. 
+4. Start ARP spoofing or ARP + DNS spoofing. 
+5. Provide domains to spoof and the fake IPs. 
+6. Press `Ctrl+C` to stop. ARP tables will be automatically restored. ---
